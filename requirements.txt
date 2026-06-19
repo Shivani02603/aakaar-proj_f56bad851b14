@@ -1,0 +1,117 @@
+**Project Name:** RAG Document Q&A  
+**Domain:** Business Intelligence / Data Analytics  
+**Client:** Not specified in BRD  
+**Team Size:** Not specified in BRD  
+**Timeline:** Not specified in BRD  
+**Budget:** Not specified in BRD  
+**Primary Users:** Users who need to ask questions about data in Excel files  
+**Tech Constraints:** Backend: Python FastAPI. Frontend: Next.js. Database: PostgreSQL with pgvector extension. Deploy: Docker Compose (backend + frontend + postgres services). Use text-embedding-3-small (OpenAI) for embeddings and gemini-2.0-flash (Google Generative AI SDK) for answer generation.
+
+Project Summary: This project involves building a web application that allows users to upload Excel files and ask natural language questions about the data. The system processes the files by splitting the content into text chunks, generating vector embeddings, and storing them for retrieval. When a user asks a question, the system finds relevant data chunks, generates an answer using a language model, and presents the response along with citations showing the source file and data location.
+
+## Functional Requirements
+
+| ID | Module | Requirement | Source Section | Priority |
+|---|---|---|---|---|
+| FR-001 | File Upload | Users must be able to upload Excel (.xlsx) files. | "users upload Excel (.xlsx) files" | High |
+| FR-002 | Ingestion Pipeline | The system must parse each uploaded Excel sheet using pandas. | "Parse each uploaded Excel sheet using pandas." | High |
+| FR-003 | Ingestion Pipeline | The system must split parsed content into overlapping chunks with a chunk size of 1000 tokens. | "Split content into overlapping chunks (chunk size 1000 tokens, overlap 200 tokens)." | High |
+| FR-004 | Ingestion Pipeline | The system must split parsed content into overlapping chunks with an overlap of 200 tokens. | "Split content into overlapping chunks (chunk size 1000 tokens, overlap 200 tokens)." | High |
+| FR-005 | Ingestion Pipeline | The system must embed each chunk using text-embedding-3-small (OpenAI). | "Embed each chunk using text-embedding-3-small (OpenAI)." | High |
+| FR-006 | Ingestion Pipeline | The system must store vector embeddings in pgvector (PostgreSQL extension). | "Store vectors in pgvector (PostgreSQL extension)." | High |
+| FR-007 | Query Pipeline | On a user question, the system must embed the query. | "On user question, embed the query" | High |
+| FR-008 | Query Pipeline | The system must retrieve the top-5 chunks by cosine similarity from pgvector. | "retrieve top-5 chunks by cosine similarity from pgvector" | High |
+| FR-009 | Query Pipeline | The system must pass the retrieved context and the user's question to gemini-2.0-flash (Google Generative AI SDK). | "pass retrieved context + question to gemini-2.0-flash (Google Generative AI SDK)" | High |
+| FR-010 | Query Pipeline | The system must return the generated answer. | "return the answer" | High |
+| FR-011 | Query Pipeline | The returned answer must include source citations specifying the filename. | "return the answer with source citations (filename, row range)" | High |
+| FR-012 | Query Pipeline | The returned answer must include source citations specifying the row range. | "return the answer with source citations (filename, row range)" | High |
+| FR-013 | Session Management | Each user must have named chat sessions stored in PostgreSQL. | "Each user has named chat sessions stored in PostgreSQL." | High |
+| FR-014 | Session Management | The system must store data in a `users` table. | "Tables: users, sessions, messages, uploaded_files." | High |
+| FR-015 | Session Management | The system must store data in a `sessions` table. | "Tables: users, sessions, messages, uploaded_files." | High |
+| FR-016 | Session Management | The system must store data in a `messages` table. | "Tables: users, sessions, messages, uploaded_files." | High |
+| FR-017 | Session Management | The system must store data in an `uploaded_files` table. | "Tables: users, sessions, messages, uploaded_files." | High |
+| FR-018 | Session Management | Users must be able to create new chat sessions. | "Users can create/switch sessions" | High |
+| FR-019 | Session Management | Users must be able to switch between chat sessions. | "Users can create/switch sessions" | High |
+| FR-020 | Session Management | Users must be able to see the full conversation history for a session. | "see full conversation history" | High |
+| FR-021 | Session Management | Each uploaded file must be linked to a session. | "Each uploaded file is linked to a session." | High |
+| FR-022 | Backend | The backend must be built using Python FastAPI. | "Backend: Python FastAPI." | High |
+| FR-023 | Frontend | The frontend must be built using Next.js. | "Frontend: Next.js" | High |
+| FR-024 | Frontend | The frontend must have a two-panel layout. | "with two-panel layout" | High |
+| FR-025 | Frontend | The left panel of the frontend must contain file upload functionality. | "left panel: file upload + session list" | High |
+| FR-026 | Frontend | The left panel of the frontend must contain a session list. | "left panel: file upload + session list" | High |
+| FR-027 | Frontend | The right panel of the frontend must be a chat window. | "right panel: chat window" | High |
+| FR-028 | Frontend | Source citations must be shown below each answer in the chat window. | "with source citations shown below each answer" | High |
+| FR-029 | Database | The system must use a PostgreSQL database. | "Database: PostgreSQL" | High |
+| FR-030 | Database | The PostgreSQL database must have the pgvector extension. | "with pgvector extension" | High |
+| FR-031 | Deployment | The system must be deployed using Docker Compose. | "Deploy: Docker Compose" | High |
+| FR-032 | Deployment | The Docker Compose setup must include a backend service. | "(backend + frontend + postgres services)" | High |
+| FR-033 | Deployment | The Docker Compose setup must include a frontend service. | "(backend + frontend + postgres services)" | High |
+| FR-034 | Deployment | The Docker Compose setup must include a postgres service. | "(backend + frontend + postgres services)" | High |
+
+# Non-Functional Requirements
+
+| ID | Category | Requirement | Measurable Metric | Source Section |
+|---|---|---|---|---|
+| NFR-001 | Performance | Parse each uploaded Excel sheet using pandas. | Not specified — define before dev. | Ingestion pipeline |
+| NFR-002 | Performance | Split content into overlapping chunks (chunk size 1000 tokens, overlap 200 tokens). | Chunk size: 1000 tokens; Overlap: 200 tokens. | Ingestion pipeline |
+| NFR-003 | Performance | Embed each chunk using text-embedding-3-small (OpenAI). | Model: text-embedding-3-small. | Ingestion pipeline |
+| NFR-004 | Performance | Store vectors in pgvector (PostgreSQL extension). | Database: PostgreSQL with pgvector extension. | Ingestion pipeline, Database |
+| NFR-005 | Performance | Retrieve top-5 chunks by cosine similarity from pgvector. | Top-k: 5 chunks. | Query pipeline |
+| NFR-006 | Performance | Pass retrieved context + question to gemini-2.0-flash (Google Generative AI SDK). | Model: gemini-2.0-flash. | Query pipeline |
+| NFR-007 | Reliability | Each user has named chat sessions stored in PostgreSQL. | Not specified — define before dev. | Session management |
+| NFR-008 | Reliability | Tables: users, sessions, messages, uploaded_files. | Required tables: users, sessions, messages, uploaded_files. | Session management |
+| NFR-009 | Usability | Users can create/switch sessions and see full conversation history. | Not specified — define before dev. | Session management |
+| NFR-010 | Usability | Each uploaded file is linked to a session. | Not specified — define before dev. | Session management |
+| NFR-011 | Usability | Frontend: Next.js with two-panel layout — left panel: file upload + session list; right panel: chat window with source citations shown below each answer. | Layout: Two-panel (left: file upload & session list; right: chat window). Source citations shown below each answer. | Frontend |
+| NFR-012 | Compatibility | Backend: Python FastAPI. | Framework: FastAPI. | Backend |
+| NFR-013 | Compatibility | Frontend: Next.js. | Framework: Next.js. | Frontend |
+| NFR-014 | Compatibility | Database: PostgreSQL with pgvector extension. | Database: PostgreSQL with pgvector extension. | Database |
+| NFR-015 | Compatibility | Deploy: Docker Compose (backend + frontend + postgres services). | Deployment method: Docker Compose with three services. | Deploy |
+
+# Constraints and Integrations
+
+## Constraints
+| ID | Type | Description | Impact |
+|---|---|---|---|
+| CON-001 | Technology | Backend must be built with Python FastAPI. | Limits backend framework choice to FastAPI. |
+| CON-002 | Technology | Frontend must be built with Next.js. | Limits frontend framework choice to Next.js. |
+| CON-003 | Technology | Database must be PostgreSQL with the pgvector extension. | Limits database choice and requires specific extension. |
+| CON-004 | Technology | Embedding model must be OpenAI's text-embedding-3-small. | Ties embedding generation to a specific external API/model. |
+| CON-005 | Technology | LLM for generating answers must be Google's gemini-2.0-flash via its SDK. | Ties answer generation to a specific external API/model. |
+| CON-006 | Technology | Deployment must use Docker Compose for backend, frontend, and postgres services. | Dictates the deployment architecture and tooling. |
+| CON-007 | Technology | File upload is restricted to Excel (.xlsx) format. | Limits the supported document types for ingestion. |
+
+## Integrations
+| ID | System | Purpose | Priority | Notes |
+|---|---|---|---|---|
+| INT-001 | OpenAI Embedding API | To generate vector embeddings for document chunks using the `text-embedding-3-small` model. | High | Critical for the RAG retrieval pipeline. |
+| INT-002 | Google Generative AI SDK (Gemini) | To generate answers by passing the retrieved context and user question to the `gemini-2.0-flash` model. | High | Critical for the Q&A response generation. |
+| INT-003 | PostgreSQL with pgvector | To store and perform similarity search on the vector embeddings of document chunks. | High | Core database for the application. |
+
+# Gaps and Risks
+
+| ID | Type | Description | Question for Client | Risk if Unresolved |
+|---|---|---|---|---|
+| GAP-001 | Ambiguity | The BRD states "Parse each uploaded Excel sheet using pandas" but does not specify how to handle complex Excel features (formulas, merged cells, multiple data types) or potential parsing errors. | How should the system handle Excel sheets with formulas, macros, merged cells, or non-tabular data? What is the expected behavior on a parsing error? | Inconsistent or failed data ingestion, leading to missing or incorrect context for Q&A. |
+| GAP-002 | Missing | No authentication or authorization mechanism is specified for the "users" table or for accessing sessions/files. | Is user authentication required? If so, what method (e.g., email/password, OAuth)? What are the authorization rules (e.g., can users access each other's sessions)? | Security vulnerability; undefined user isolation and data privacy. |
+| GAP-003 | Missing | No details are provided on the schema for the `users`, `sessions`, `messages`, and `uploaded_files` tables (e.g., fields, data types, relationships). | What are the specific fields and data types required for each database table? What are the foreign key relationships? | Inability to design and implement the correct database schema. |
+| GAP-004 | Missing | No performance requirements or service level agreements (SLAs) are specified for upload processing, query latency, or system availability. | What are the expected latency thresholds for file processing and query response? What is the required system uptime/availability? | Unclear performance targets, leading to potential user dissatisfaction if the system is slow or unreliable. |
+| GAP-005 | Missing | No limits are specified for file size, number of uploads per session/user, or total storage capacity. | Are there any limits on individual Excel file size, number of files per session, or total vector storage? | System could be overwhelmed by very large files or excessive data, causing performance degradation or storage costs to spiral. |
+| GAP-006 | Ambiguity | The requirement to "return the answer with source citations (filename, row range)" is ambiguous. It's unclear what constitutes a "row range" from a chunked document and how to map it back to the original Excel rows. | How should source citations be formatted? For a chunk derived from multiple original rows, what row range should be cited? | Inaccurate or misleading source citations, reducing user trust in the system's answers. |
+| GAP-007 | Technical Risk | The system depends on two external LLM/Embedding APIs (OpenAI and Google). No fallback strategy, error handling, or cost management is mentioned. | What is the fallback plan if one of the external APIs is down or rate-limited? Are there budget or usage limits for these APIs? | System failure or unexpected costs if external services are unavailable or usage exceeds budgets. |
+| GAP-008 | Missing | No requirements for data retention, privacy, or deletion (e.g., GDPR). Can users delete their uploaded files and chat history? | What is the data retention policy? How should user data deletion requests be handled? | Non-compliance with data protection regulations and inability to meet user privacy expectations. |
+# AI layer dependencies
+google-generativeai>=0.8.0
+numpy>=1.26.0
+openai>=1.3.0
+openpyxl>=3.1.2
+pandas>=2.1.0
+pgvector>=0.2.0
+sqlalchemy
+alembic
+fastapi
+pydantic
+python-jose
+passlib
+psycopg2-binary
+requests
